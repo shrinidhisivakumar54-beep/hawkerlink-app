@@ -81,3 +81,34 @@ svg{fill:none;stroke:currentColor;stroke-width:4.2;stroke-linecap:round;stroke-l
 }
 
 .name-help{background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:12px;margin:-4px 0 2px}
+
+
+/* Firebase logout/reset controls */
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+.reset-btn{
+  border:1px solid #fecaca;
+  background:#fee2e2;
+  color:#991b1b;
+  border-radius:18px;
+  padding:10px 12px;
+  font:inherit;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+}
+.reset-btn:hover{background:#fecaca}
+.header-actions .text-btn{
+  border-radius:18px;
+  padding:10px 12px;
+  background:var(--soft);
+  border:1px solid var(--line);
+}
+@media (max-width:380px){
+  .header-actions{gap:5px}
+  .reset-btn,.header-actions .text-btn{padding:9px 10px;font-size:12px}
+}

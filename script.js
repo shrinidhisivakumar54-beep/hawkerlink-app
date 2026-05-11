@@ -7,7 +7,8 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
   updateProfile,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const firebaseConfig = {
@@ -269,12 +270,47 @@ $('signupForm').onsubmit = async e => {
     toast('Firebase sign up failed: ' + error.message);
   }
 };
-$('logoutBtn').onclick = async () => {
-  try { await signOut(auth); } catch(error) {}
+function clearSessionOnly(){
   currentUser = null;
-  localStorage.removeItem(KEY+'currentUser');
+  localStorage.removeItem(KEY + 'currentUser');
+  localStorage.removeItem('currentUser');
+  localStorage.removeItem('loggedInUser');
+  sessionStorage.clear();
+}
+
+function clearFullAppStorage(){
+  // Clear every HawkerLink saved item, including old accounts/listings saved on this browser.
+  Object.keys(localStorage).forEach(key => {
+    if(key.startsWith(KEY) || key.toLowerCase().includes('hawkerlink') || key === 'currentUser' || key === 'loggedInUser'){
+      localStorage.removeItem(key);
+    }
+  });
+  sessionStorage.clear();
+  users = [];
+  currentUser = null;
+  orders = [];
+  feedback = [];
+  suspensions = {};
+  stallReports = [];
+}
+
+async function logoutUser(){
+  try { await signOut(auth); } catch(error) { console.warn('Firebase logout failed:', error); }
+  clearSessionOnly();
   go('authScreen');
-};
+  toast('Logged out. Please log in again.');
+}
+
+async function resetAppCompletely(){
+  const ok = confirm('Reset HawkerLink on this browser? This clears saved login data and restarts the app.');
+  if(!ok) return;
+  try { await signOut(auth); } catch(error) { console.warn('Firebase sign out during reset failed:', error); }
+  clearFullAppStorage();
+  window.location.href = window.location.pathname;
+}
+
+$('logoutBtn').onclick = logoutUser;
+if($('resetAppBtn')) $('resetAppBtn').onclick = resetAppCompletely;
 
 function navItem(target, icon, label, active){ return `<button class="nav-btn ${active===target?'active':''}" data-target="${target}" type="button"><span>${icons[icon]}</span><span class="nav-label">${label}</span></button>`; }
 function renderNav(active){
@@ -431,4 +467,59 @@ document.querySelectorAll('.chip').forEach(btn => btn.onclick = () => { document
 $('mapSearch').oninput = () => { const q = $('mapSearch').value.toLowerCase(); const h = NEARBY_HAWKERS.find(x => x.name.toLowerCase().includes(q) || x.address.toLowerCase().includes(q)); if(h) focusCentre(h); };
 
 renderSlots(); drawIcons(); applyLanguage();
-if(currentUser) go('homeScreen');
+
+// Keep Firebase Authentication and the app's saved browser session in sync.
+// This prevents deleted Firebase users from staying logged in through old localStorage data.
+onAuthStateChanged(auth, async firebaseUser => {
+  if(!firebaseUser){
+    if(currentUser){
+      clearSessionOnly();
+      toast('Session ended. Please log in again.');
+    }
+    go('authScreen');
+    return;
+  }
+
+  // If email is not verified, do not allow the app to stay logged in.
+  if(!firebaseUser.emailVerified){
+    await signOut(auth);
+    clearSessionOnly();
+    go('authScreen');
+    toast('Please verify your email first. Check Inbox, then Spam/Junk.');
+    return;
+  }
+
+  const email = (firebaseUser.email || '').toLowerCase();
+  let user = users.find(u => (u.contact || '').toLowerCase() === email);
+
+  if(!user){
+    const username = makeUsernameFromEmail(email);
+    user = {
+      username,
+      password:'firebase-auth',
+      contact:email,
+      role:'resident',
+      name:firebaseUser.displayName || username,
+      verified:true,
+      language:'en',
+      favoriteStalls:[]
+    };
+    users.push(user);
+  }
+
+  if(!user.name || user.name.toLowerCase() === email || user.name.includes('@')){
+    user.name = firebaseUser.displayName || user.username || email.split('@')[0];
+  }
+
+  if(isSuspended(user.username)){
+    await signOut(auth);
+    clearSessionOnly();
+    go('authScreen');
+    toast('Account temporarily suspended due to repeated reports');
+    return;
+  }
+
+  currentUser = {...user, verified:true, language:user.language || 'en', favoriteStalls:user.favoriteStalls || []};
+  save();
+  go('homeScreen');
+});
