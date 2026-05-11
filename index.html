@@ -2,263 +2,172 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>HawkerLink</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="phone-shell">
-    <main class="app" id="app">
-      <!-- AUTH -->
-      <section class="screen active" id="authScreen">
-        <div class="hero-auth">
+    <main class="app">
+      <section id="authScreen" class="screen active auth-screen">
+        <div class="auth-bg"></div>
+        <div class="auth-card">
           <div class="brand-row">
-            <div class="logo-mark">HL</div>
+            <div class="logo-mark" data-icon="home"></div>
             <div>
-              <p class="eyebrow">GovTech inspired community platform</p>
+              <p class="eyebrow" data-i18n="tagline">Community Food Rescue</p>
               <h1>HawkerLink</h1>
             </div>
           </div>
-          <p class="auth-copy">Share surplus food safely, locate nearby hawker centres, verify sellers, and reduce food waste together.</p>
-        </div>
+          <p class="intro" data-i18n="intro">Connects verified hawkers with nearby residents so fresh surplus food can be collected safely instead of wasted.</p>
 
-        <section class="auth-image-card" aria-label="HawkerLink visual preview">
-          <img src="assets/hawker-bg.jpeg" alt="Singapore hawker centre interior" />
-          <div class="auth-image-overlay"></div>
-          <div class="auth-image-text">
-            <span>Community first</span>
-            <h2>Share surplus food before it goes to waste.</h2>
-            <p>Verified hawkers, GPS pickup points, collection times, and resident feedback in one trusted app.</p>
-          </div>
-        </section>
-
-        <div class="auth-card glass">
-          <div class="segmented">
-            <button class="seg-btn active" data-auth-tab="login">Login</button>
-            <button class="seg-btn" data-auth-tab="signup">Sign up</button>
+          <div class="auth-tabs">
+            <button class="active" id="showLogin" type="button" data-i18n="login">Log in</button>
+            <button id="showSignup" type="button" data-i18n="signup">Sign up</button>
           </div>
 
-          <form id="loginForm" class="auth-form">
-            <label>Username
-              <input type="text" id="loginUsername" placeholder="e.g. shrinidhi" autocomplete="username" required />
-            </label>
-            <label>Password
-              <input type="password" id="loginPassword" placeholder="Minimum 6 characters" minlength="6" required />
-            </label>
-            <button class="primary-btn" type="submit">Login to HawkerLink</button>
-            <p class="small-note">Demo tip: sign up once with a username and your account will be remembered on this browser.</p>
+          <form id="loginForm" class="form-card">
+            <label><span data-i18n="username">Email</span><input id="loginUsername" autocomplete="username" required placeholder="Enter your verified email" /></label>
+            <label><span data-i18n="password">Password</span><input id="loginPassword" autocomplete="current-password" type="password" required placeholder="Enter your password" /></label>
+            <button id="forgotPasswordBtn" class="text-link-btn" type="button">Forgot password?</button>
+            <button class="primary-btn" type="submit" data-i18n="login">Log in</button>
+            <p class="helper">Log in with the verified email and password you used during sign up.</p>
           </form>
 
-          <form id="signupForm" class="auth-form hidden">
-            <label>Full name
-              <input type="text" id="signupName" placeholder="e.g. Shrinidhi" required />
-            </label>
-            <label>Username
-              <input type="text" id="signupUsername" placeholder="Choose a username" autocomplete="username" required />
-            </label>
-            <label>Password
-              <input type="password" id="signupPassword" placeholder="Minimum 6 characters" minlength="6" required />
-            </label>
-            <label>Account type
-              <select id="signupRole" required>
-                <option value="resident">Resident</option>
-                <option value="hawker">Hawker</option>
+          <form id="signupForm" class="form-card hidden">
+            <label><span data-i18n="displayName">Name shown in app</span><input id="signupName" required placeholder="e.g. Shrinidhi" /></label>
+            <p class="helper name-help" data-i18n="nameHelp">This name will appear on the home page and profile. Your email is only used for login and verification.</p>
+            <label><span data-i18n="contact">Email</span><input id="signupContact" type="email" required placeholder="example@gmail.com" /></label>
+            <p class="helper email-help" data-i18n="emailVerificationHelp">No 6-digit code is needed. After you click Create account, Firebase will send a verification link to your email. Check Inbox first, then Spam/Junk if it is not there.</p>
+            <label><span data-i18n="password">Password</span><input id="signupPassword" type="password" required placeholder="Min 6 characters" /></label>
+            <label><span data-i18n="accountType">Account type</span>
+              <select id="signupRole">
+                <option value="resident" data-i18n="resident">Resident</option>
+                <option value="hawker" data-i18n="hawker">Hawker</option>
               </select>
             </label>
-            <div id="hawkerSignupFields" class="hawker-only hidden">
-              <label>Stall name
-                <input type="text" id="stallName" placeholder="e.g. Ah Lim Fresh Greens" />
-              </label>
-              <label>Hawker centre
-                <input type="text" id="stallCentre" placeholder="e.g. Pasir Ris Central Hawker Centre" />
-              </label>
-              <label>Food hygiene certificate number
-                <input type="text" id="certNo" placeholder="e.g. FH-2026-00123" />
-              </label>
-              <label>Upload certificate
-                <input type="file" id="certFile" accept=".pdf,.jpg,.jpeg,.png" />
-              </label>
+            <div id="hawkerSignupFields" class="sub-box hidden">
+              <label><span data-i18n="stallName">Stall name</span><input id="stallName" placeholder="e.g. Ah Lim Vegetables" /></label>
+              <label><span data-i18n="hawkerCentre">Hawker centre</span><input id="stallCentre" placeholder="Pasir Ris Central Hawker Centre" /></label>
+              <label><span data-i18n="certNo">Food hygiene certificate no.</span><input id="certNo" placeholder="Certificate number" /></label>
             </div>
-            <button class="primary-btn" type="submit">Create account</button>
+            <button class="primary-btn" type="submit" data-i18n="createAccount">Create account</button>
           </form>
         </div>
       </section>
 
-      <!-- HOME -->
-      <section class="screen" id="homeScreen">
-        <header class="top-header">
-          <div>
-            <p id="accountLabel">Resident account</p>
-            <h2 id="userName">Welcome</h2>
-          </div>
-          <button class="icon-btn" id="logoutBtn" title="Logout">↗</button>
+      <section id="homeScreen" class="screen">
+        <header class="app-header">
+          <div><p id="accountLabel" class="eyebrow"></p><h2><span data-i18n="hi">Hi</span>, <span id="userName"></span></h2></div>
+          <button id="logoutBtn" class="text-btn" type="button" data-i18n="logout">Log out</button>
         </header>
-
-        <section class="banner-card">
-          <img src="assets/hawker-bg.jpeg" alt="Singapore hawker centre" />
-          <div class="banner-overlay"></div>
-          <div class="banner-content">
-            <span>Hawker Community</span>
-            <h1>Share surplus food before it goes to waste.</h1>
-            <div class="accent-line"></div>
-            <p>Find nearby hawker centres, list extra items, and help the community.</p>
+        <section class="hero-card">
+          <div class="hero-shade">
+            <p class="eyebrow light" data-i18n="lessWaste">Less waste, more care</p>
+            <h3 data-i18n="heroTitle">Share fresh surplus food with the community.</h3>
+            <p data-i18n="heroDesc">Browse listings, check stall feedback, collect safely, and support local hawkers.</p>
           </div>
         </section>
-
-        <section class="role-alert" id="roleAlert"></section>
-
-        <section class="quick-grid" id="quickGrid"></section>
+        <div id="roleAlert" class="notice-card hidden"></div>
+        <div id="quickGrid" class="quick-grid"></div>
       </section>
 
-      <!-- LISTINGS -->
-      <section class="screen" id="listingsScreen">
-        <header class="page-header">
-          <button class="back-btn" data-go="homeScreen">‹</button>
-          <div><p>Fresh Listings</p><h2>Available nearby</h2></div>
-        </header>
-        <div class="filter-row">
-          <button class="chip active" data-filter="all">All</button>
-          <button class="chip" data-filter="vegetables">Vegetables</button>
-          <button class="chip" data-filter="fruit">Fruit</button>
-          <button class="chip" data-filter="meals">Meals</button>
-        </div>
-        <div id="listingContainer" class="listing-list"></div>
-      </section>
-
-      <!-- MAP -->
-      <section class="screen" id="mapScreen">
-        <header class="page-header">
-          <button class="back-btn" data-go="homeScreen">‹</button>
-          <div><p>Nearby Map</p><h2>Locate hawker centres</h2></div>
-        </header>
-        <div class="map-card">
-          <div class="map-wrap">
-            <iframe class="map-frame" id="mapFrame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps?q=Pasir%20Ris%20hawker%20centre%20food%20court&z=13&output=embed"></iframe>
-            <div class="map-pins" id="mapPins" aria-label="Nearby hawker centre shortcuts"></div>
+      <section id="listingsScreen" class="screen">
+        <header class="app-header compact"><button class="back-btn" data-go="homeScreen" type="button" data-i18n="back">Back</button><div><p class="eyebrow" data-i18n="listingsEyebrow">Fresh surplus nearby</p><h2 data-i18n="freshListings">Fresh Listings</h2></div></header>
+        <div class="sticky-search">
+          <div class="search-box"><span data-icon="search"></span><input id="searchInput" /><button id="clearSearch" type="button" data-i18n="clear">Clear</button></div>
+          <div class="chips">
+            <button class="chip active" data-filter="all" type="button" data-i18n="all">All</button>
+            <button class="chip" data-filter="vegetables" type="button" data-i18n="vegetables">Vegetables</button>
+            <button class="chip" data-filter="fruit" type="button" data-i18n="fruit">Fruit</button>
+            <button class="chip" data-filter="meals" type="button" data-i18n="meals">Meals</button>
           </div>
-          <div class="map-actions">
-            <button class="primary-btn" id="gpsBtn">Use GPS Location</button>
-            <button class="secondary-btn" id="pasirRisBtn" type="button">Set to Pasir Ris</button>
-          </div>
-          <button class="secondary-btn" id="openMapBtn" type="button">Open bigger map</button>
-          <p class="small-note" id="gpsStatus">Default map is set to Pasir Ris Central Hawker Centre.</p>
         </div>
-        <div class="centre-list" id="centreList"></div>
+        <div id="favouritesBanner" class="favourites-banner hidden"></div>
+        <div id="listingContainer" class="list-stack"></div>
       </section>
 
-      <!-- HAWKER VERIFY -->
-      <section class="screen" id="verifyScreen">
-        <header class="page-header">
-          <button class="back-btn" data-go="homeScreen">‹</button>
-          <div><p>Verified Hawkers</p><h2>Submit certificate</h2></div>
-        </header>
-        <form id="verifyForm" class="form-card">
-          <label>Stall name<input id="verifyStall" type="text" required /></label>
-          <label>Food hygiene certificate number<input id="verifyCert" type="text" required /></label>
-          <label>Certificate expiry date<input id="verifyExpiry" type="date" required /></label>
-          <label>Upload food hygiene certificate<input id="verifyFile" type="file" accept=".pdf,.jpg,.jpeg,.png" required /></label>
-          <label>Declaration
-            <select id="verifyDeclaration" required>
-              <option value="">Select declaration</option>
-              <option>I confirm the certificate is valid and belongs to my stall.</option>
-            </select>
-          </label>
-          <button class="primary-btn" type="submit">Submit for verification</button>
-        </form>
-        <div id="verifyResult" class="status-card hidden"></div>
-      </section>
-
-      <!-- HAWKER LIST ITEM -->
-      <section class="screen" id="addListingScreen">
-        <header class="page-header">
-          <button class="back-btn" data-go="homeScreen">‹</button>
-          <div><p>Hawker Portal</p><h2>Add surplus item</h2></div>
-        </header>
-        <form id="addListingForm" class="form-card">
-          <label>Item name<input id="itemName" type="text" placeholder="e.g. Spinach bundle" required /></label>
-          <label>Category
-            <select id="itemCategory" required>
-              <option value="vegetables">Vegetables</option>
-              <option value="fruit">Fruit</option>
-              <option value="meals">Meals</option>
-            </select>
-          </label>
-          <label>Quantity<input id="itemQty" type="text" placeholder="e.g. 12 bundles" required /></label>
-          <label>Pricing<input id="itemPrice" type="text" placeholder="e.g. Free / $1.50 / PayNow accepted" required /></label>
-          <label>Collection window<input id="itemTime" type="text" placeholder="e.g. 6:30 PM – 8:00 PM" required /></label>
-          <label>Pickup location<input id="itemLocation" type="text" placeholder="e.g. Stall #02-14" required /></label>
-          <button class="primary-btn" type="submit">Publish listing</button>
+      <section id="addListingScreen" class="screen">
+        <header class="app-header compact"><button class="back-btn" data-go="homeScreen" type="button" data-i18n="back">Back</button><div><p class="eyebrow" data-i18n="hawkerTools">Hawker tools</p><h2 data-i18n="addListing">Add Listing</h2></div></header>
+        <form id="addListingForm" class="form-card page-card">
+          <label><span data-i18n="itemName">Item name</span><input id="itemName" required placeholder="e.g. Spinach bundles" /></label>
+          <label><span data-i18n="category">Category</span><select id="itemCategory"><option value="vegetables" data-i18n="vegetables">Vegetables</option><option value="fruit" data-i18n="fruit">Fruit</option><option value="meals" data-i18n="meals">Meals</option></select></label>
+          <div class="two-col"><label><span data-i18n="quantity">Quantity</span><input id="itemQty" required type="number" min="1" value="5" /></label><label><span data-i18n="maxResident">Max / resident</span><input id="itemLimit" required type="number" min="1" value="2" /></label></div>
+          <label><span data-i18n="priceNote">Price or payment note</span><input id="itemPrice" required placeholder="Free / $1.00 / Pay what you can" /></label>
+          <label><span data-i18n="pickupLocation">Pickup location</span><input id="itemLocation" required placeholder="Stall #02-14, beside drinks stall" /></label>
+          <div class="form-label" data-i18n="collectionSlots">Collection slots</div>
+          <p class="small-note tight" data-i18n="slotHelp">Tick every timing you are free for residents to collect. You can choose more than one.</p>
+          <div id="itemSlots" class="slot-checks"></div>
+          <button class="primary-btn" type="submit" data-i18n="publish">Publish listing</button>
         </form>
       </section>
 
-      <!-- ORDERS -->
-      <section class="screen" id="ordersScreen">
-        <header class="page-header">
-          <button class="back-btn" data-go="homeScreen">‹</button>
-          <div><p>Collection</p><h2>Your claimed items</h2></div>
-        </header>
-        <div id="ordersList" class="listing-list"></div>
+      <section id="mapScreen" class="screen">
+        <header class="app-header map-title"><button class="back-btn" data-go="homeScreen" type="button" data-i18n="back">Back</button><h2 data-i18n="map">Map</h2><span class="header-logo" data-icon="basket"></span></header>
+        <div class="map-search search-box"><span data-icon="search"></span><input id="mapSearch" /></div>
+        <div class="location-line"><span data-icon="pin"></span><span id="locationText"></span></div>
+        <div class="map-panel"><div id="leafletMap"></div><button id="resetPasirRisBtn" class="map-reset" type="button"><span data-icon="target"></span><span data-i18n="resetPasirRis">Reset to Pasir Ris</span></button></div>
+        <div id="nearbyHawkerList" class="nearby-list"></div>
+        <div class="map-actions"><button id="gpsBtn" class="primary-btn" type="button" data-i18n="useGps">Use my real GPS</button><button id="openMapBtn" class="secondary-btn" type="button" data-i18n="openMaps">Open in Maps</button></div>
+        <p id="gpsStatus" class="small-note"></p>
       </section>
 
-      <!-- FEEDBACK -->
-      <section class="screen" id="feedbackScreen">
-        <header class="page-header">
-          <button class="back-btn" data-go="homeScreen">‹</button>
-          <div><p>Feedback</p><h2>Rate your experience</h2></div>
-        </header>
-        <form id="feedbackForm" class="form-card">
-          <label>Stall / centre name<input id="fbStall" type="text" placeholder="e.g. Ah Lim Fresh Greens" required /></label>
-          <label>Rating
-            <select id="fbRating" required>
-              <option value="5">★★★★★ Excellent</option>
-              <option value="4">★★★★ Good</option>
-              <option value="3">★★★ Okay</option>
-              <option value="2">★★ Needs improvement</option>
-              <option value="1">★ Poor</option>
-            </select>
-          </label>
-          <label>Comments<textarea id="fbComment" placeholder="Share what went well or what can improve." required></textarea></label>
-          <button class="primary-btn" type="submit">Submit feedback</button>
+      <section id="ordersScreen" class="screen">
+        <header class="app-header compact"><button class="back-btn" data-go="homeScreen" type="button" data-i18n="back">Back</button><div><p class="eyebrow" data-i18n="confirmed">Confirmed</p><h2 data-i18n="myCollections">My Collections</h2></div></header>
+        <div id="ordersContainer" class="list-stack"></div>
+      </section>
+
+      <section id="feedbackScreen" class="screen">
+        <header class="app-header compact"><button class="back-btn" data-go="homeScreen" type="button" data-i18n="back">Back</button><div><p class="eyebrow" data-i18n="residentFeedback">Resident feedback</p><h2 data-i18n="feedback">Feedback</h2></div></header>
+        <form id="feedbackForm" class="form-card page-card">
+          <label><span data-i18n="claimedItem">Claimed item</span><select id="feedbackOrder"></select></label>
+          <label><span data-i18n="rating">Rating</span><select id="feedbackStars"><option value="5">5 - Excellent</option><option value="4">4 - Good</option><option value="3">3 - Okay</option><option value="2">2 - Poor</option><option value="1">1 - Very poor</option></select></label>
+          <label><span data-i18n="feedbackLabel">Feedback</span><textarea id="feedbackText" rows="4" required></textarea></label>
+          <label><span data-i18n="uploadProof">Upload proof/photo if needed</span><input id="feedbackPhoto" type="file" accept="image/*" /></label>
+          <label class="check-line"><input id="reportIssue" type="checkbox" /><span data-i18n="reportIssue">Report issue / no vegetables available</span></label>
+          <p class="small-note tight" data-i18n="reportIssueHelp">Use this only if the stall had no vegetables available, the listing was inaccurate, or you need to show proof.</p>
+          <button class="primary-btn" type="submit" data-i18n="submitFeedback">Submit feedback</button>
         </form>
-        <div id="feedbackList" class="feedback-list"></div>
       </section>
 
-      <!-- PROFILE -->
-      <section class="screen" id="profileScreen">
-        <header class="page-header">
-          <button class="back-btn" data-go="homeScreen">‹</button>
-          <div><p>Account</p><h2>Saved profile</h2></div>
-        </header>
+      <section id="verifyScreen" class="screen">
+        <header class="app-header compact"><button class="back-btn" data-go="homeScreen" type="button" data-i18n="back">Back</button><div><p class="eyebrow" data-i18n="compliance">Compliance</p><h2 data-i18n="verification">Hawker Verification</h2></div></header>
+        <form id="verifyForm" class="form-card page-card">
+          <label><span data-i18n="stallName">Stall name</span><input id="verifyStall" required /></label>
+          <label><span data-i18n="certNo">Food hygiene certificate no.</span><input id="verifyCert" required /></label>
+          <label><span data-i18n="expiry">Certificate expiry date</span><input id="verifyExpiry" type="date" required /></label>
+          <label><span data-i18n="uploadCert">Upload certificate</span><input id="verifyFile" type="file" accept="image/*,.pdf" /></label>
+          <button class="primary-btn" type="submit" data-i18n="submitVerification">Submit verification</button>
+        </form>
+      </section>
+
+      <section id="profileScreen" class="screen">
+        <header class="app-header compact"><button class="back-btn" data-go="homeScreen" type="button" data-i18n="back">Back</button><div><p class="eyebrow" data-i18n="account">Account</p><h2 data-i18n="profile">Profile</h2></div></header>
         <div id="profileCard" class="profile-card"></div>
+        <div class="form-card page-card">
+          <label><span data-i18n="language">Language</span><select id="languageSelect"><option value="en">English</option><option value="zh">中文 Chinese</option><option value="ta">தமிழ் Tamil</option></select></label>
+          <p class="small-note" data-i18n="saveLangHelp">This saves your preferred display language for your account.</p>
+        </div>
       </section>
 
-      <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation"></nav>
+      <div id="claimModal" class="modal hidden">
+        <div class="modal-card">
+          <button id="closeModal" class="x-btn" type="button">×</button>
+          <h3 data-i18n="confirmCollection">Confirm Collection</h3>
+          <label><span data-i18n="quantity">Quantity</span><input id="claimQty" type="number" min="1" value="1" /></label>
+          <label><span data-i18n="collectionSlots">Collection slots</span><select id="claimSlot"></select></label>
+          <div class="form-label" data-i18n="paymentMode">Payment mode</div>
+          <div class="pay-grid"><button data-pay="PayNow" type="button">PayNow</button><button data-pay="Cash" type="button">Cash</button><button data-pay="Free" type="button">Free</button></div>
+          <button id="confirmClaim" class="primary-btn" type="button" data-i18n="confirmClaim">Confirm claim</button>
+        </div>
+      </div>
+
+      <nav id="bottomNav" class="bottom-nav"></nav>
+      <div id="toast" class="toast hidden"></div>
     </main>
   </div>
-
-  <div class="claim-modal" id="claimModal">
-    <div class="claim-box">
-      <div>
-        <p class="eyebrow">Confirm collection</p>
-        <h2 id="modalItemName">Claim item</h2>
-      </div>
-      <div class="claim-summary" id="modalSummary"></div>
-      <div>
-        <p class="small-note" style="margin-bottom:8px;font-weight:900;color:#687283">Choose payment method</p>
-        <div class="payment-grid">
-          <button type="button" class="payment-option active" data-payment="PayNow">PayNow</button>
-          <button type="button" class="payment-option" data-payment="Cash">Cash</button>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="danger-light" id="cancelClaim" type="button">Cancel</button>
-        <button class="primary-btn" id="confirmClaim" type="button">Confirm & save collection</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-  <script src="script.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
